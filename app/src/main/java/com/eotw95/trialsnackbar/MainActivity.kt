@@ -8,16 +8,16 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.material.Button
 import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Scaffold
-import androidx.compose.material.SnackbarHost
-import androidx.compose.material.SnackbarHostState
+import androidx.compose.material.ScaffoldState
 import androidx.compose.material.Surface
 import androidx.compose.material.Text
+import androidx.compose.material.rememberScaffoldState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Modifier
 import com.eotw95.trialsnackbar.ui.theme.TrialSnackbarTheme
-import kotlinx.coroutines.launch
+import kotlinx.coroutines.CoroutineScope
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -38,21 +38,32 @@ class MainActivity : ComponentActivity() {
 
 @Composable
 fun ShowSnackBar() {
-    val hostState = remember { SnackbarHostState() }
-    val coroutineScope = rememberCoroutineScope()
+//    val hostState = remember { SnackbarHostState() }
+//    val coroutineScope = rememberCoroutineScope()
+    val state = rememberAppState()
     Scaffold(
-        snackbarHost = {
-            SnackbarHost(hostState = hostState)
-        }
+        // Scaffold()の定義でsnackbarHost: @Composable (SnackbarHostState) -> Unit = { SnackbarHost(it) },
+        // となっているので、ここで同じことを書く必要ない
+//        snackbarHost = {
+//            SnackbarHost(hostState = it)
+//        },
+        scaffoldState = state.scaffoldState
     ) {
         Surface(modifier = Modifier.padding(it)) {
             Button(
-                onClick = {
-                    coroutineScope.launch { hostState.showSnackbar("sample text") }
-                }
+                onClick = state::showMessages
             ) {
                 Text(text = "Show Snack bar")
             }
         }
     }
 }
+
+@Composable
+fun rememberAppState(
+    scaffoldState: ScaffoldState = rememberScaffoldState(),
+    coroutineScope: CoroutineScope = rememberCoroutineScope()
+) =
+    remember(scaffoldState, coroutineScope) {
+        AppState(scaffoldState, coroutineScope)
+    }
